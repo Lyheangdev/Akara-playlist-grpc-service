@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+message EmptyResponse {}
+message EmptyRequest {}
+
+enum STATUS {
+    EXIST = 0;
+    OK = 1;
+    NOTFOUND = 2;
+}
+
+message PlaylistRequest {
+    optional string playlist_id = 1;
+    optional string user_id =2;
+    string playlist_name = 3;
+}
+
+message Playlist {
+    string playlist_id = 1;
+    string user_id = 2;
+    string playlist_name= 3;
+    string created_at = 4;
+    string updated_at = 5;
+}
+
+message PlaylistResponse {
+    bool error = 1;
+    STATUS status = 2;
+    string message = 3;
+    optional Playlist data = 4;
+}
+
+message PlaylistResponses {
+    bool error = 1;
+    STATUS status = 2;
+    string message = 3;
+    repeated Playlist data = 4;
+}
+
+
+service PlaylistService {
+    rpc RetrievePlaylistByUser (PlaylistRequest) returns (PlaylistResponses) {}
+    rpc RetrievePlaylist (EmptyRequest) returns (PlaylistResponses) {}
+    rpc CreatePlaylist (PlaylistRequest) returns (PlaylistResponse) {}
+    rpc UpdatePlaylist (PlaylistRequest) returns (PlaylistResponse) {}
+    rpc DeletePlaylist (PlaylistRequest) returns (PlaylistResponse) {}
+}
+
+//--- Playlist Podcast Section
+
+service PlaylistPodcastService {
+    rpc RemovePodcastFromPlayListByPlaylist (PlaylistPodcastRequest) returns (PlaylistPodcastResponses) {}
+    rpc RetrievePodcastsFromPlaylist (PlaylistPodcastRequest) returns (PlaylistPodcastResponses) {}
+    rpc AddPodcastToPlaylist (PlaylistPodcastRequest) returns (PlaylistPodcastResponse) {}
+    rpc RemovePodcastFromPlaylist (PlaylistPodcastRequest) returns (PlaylistPodcastResponse) {}
+}
+
+message PlaylistPodcastRequest {
+    optional string user_id = 1;
+    optional string podcast_id = 2;
+    optional string playlist_id =3;
+}
+
+message PlaylistPodcast {
+     string user_id =1 ;
+     string playlist_id = 2;
+     string podcast_id = 3;
+     string created_at = 4;
+     string updated_at = 5;
+}
+
+message PlaylistPodcastResponse {
+    bool error = 1;
+    string message = 2;
+    STATUS status = 3;
+    optional PlaylistPodcast data =4;
+}
+
+message PlaylistPodcastResponses {
+    bool error = 1;
+    string message = 2;
+    STATUS status = 3;
+    repeated PlaylistPodcast data = 4;
+}

@@ -15,8 +15,8 @@ jobs:
       #--- Note pass build-version
       # to old-build-version when you build for section time
 
-      OLD_BUILD_VERSION: v2
-      BUILD_VERSION: v3
+      OLD_BUILD_VERSION:
+      BUILD_VERSION: v1
 
       CONTAINER_SVC1_NAME: playlist-service-svc1
       CONTAINER_SVC2_NAME: playlist-service-svc2

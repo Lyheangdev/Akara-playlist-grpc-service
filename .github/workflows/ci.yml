@@ -13,7 +13,7 @@ jobs:
       SYSTEM_NAME: akara
       DOCKER_REGISTRY: lyheangdev
       DOCKER_IMAGE: playlist_service
-      BUILD_VERSION: v2
+      BUILD_VERSION: v1
 
     steps:
       - name: "=== SETTING UP NODE VERSION 20 FOR NEWER SUPPORT ON GIT ACTION ==="

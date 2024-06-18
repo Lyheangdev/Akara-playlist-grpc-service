@@ -1,0 +1,76 @@
+name: AKARA-CD
+on:
+  workflow_run:
+    workflows: ["AKARA-PLAYLIST-CI"]
+    types:
+      - completed
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      SYSTEM_NAME: akara
+      DOCKER_REGISTRY: lyheangdev
+      DOCKER_IMAGE: playlist_service
+
+      #--- Note pass build-version
+      # to old-build-version when you build for section time
+
+      OLD_BUILD_VERSION:
+      BUILD_VERSION: v1
+
+      CONTAINER_SVC1_NAME: playlist-service-svc1
+      CONTAINER_SVC2_NAME: playlist-service-svc2
+      CONTAINER_SVC3_NAME: playlist-service-svc3
+
+      HOST_PORT_SVC1: 6001
+      HOST_PORT_SVC2: 6002
+      HOST_PORT_SVC3: 6003
+
+      CONTAINER_PORT: 6000
+    steps:
+      # -- PULL LATEST IMAGE
+      - name: "=== PULLING DOCKER IMAGE FROM DOCKERHUB ==="
+        run: sudo docker pull ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+        # -- STOP ALL OLD SERVICES
+      - name: "=== STOPPING SERVICE-1 RUNING CONTAINER"
+        if: ${{ env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker stop ${{env.CONTAINER_SVC1_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+      - name: "=== STOPPING SERVICE-2 RUNING CONTAINER"
+        if: ${{env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker stop ${{env.CONTAINER_SVC2_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+      - name: "=== STOPPING SERVICE-3 RUNING CONTAINER"
+        if: ${{env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker stop ${{env.CONTAINER_SVC3_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+        # -- REMOVE ALL RUNNING CONTAINERS
+      - name: "=== REMOVE SV1 CONTAINER ==="
+        if: ${{env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker rm ${{env.CONTAINER_SVC1_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+      - name: "=== REMOVE SV2 CONTAINER ==="
+        if: ${{env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker rm ${{env.CONTAINER_SVC2_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+      - name: "=== REMOVE SV3 CONTAINER ==="
+        if: ${{env.OLD_BUILD_VERSION!=null || env.OLD_BUILD_VERSION !=''}}
+        run: sudo docker rm ${{env.CONTAINER_SVC3_NAME}}-${{env.OLD_BUILD_VERSION}} || true
+
+        # -- OMITTING OLD DOCKER IMAGES
+      - name: "=== OMITTING OLD DOCKER IMAGE ==="
+        run: sudo docker rmi -f ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.OLD_BUILD_VERSION}} || true
+
+        # -- SPIN UP NEW CONTAINERS SERVICES
+      - name: "=== SPINNING UP DOCKER CONTAINER SVC1 ==="
+        run: sudo docker run --rm --name ${{env.CONTAINER_SVC1_NAME}}-${{env.BUILD_VERSION}} -d -p ${{env.HOST_PORT_SVC1}}:${{env.CONTAINER_PORT}} ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+      - name: "=== SPINNING UP DOCKER CONTAINER SVC2 ==="
+        run: sudo docker run --rm --name ${{env.CONTAINER_SVC2_NAME}}-${{env.BUILD_VERSION}} -d -p ${{env.HOST_PORT_SVC2}}:${{env.CONTAINER_PORT}} ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+      - name: "=== SPINNING UP DOCKER CONTAINER SVC3 ==="
+        run: sudo docker run --rm --name ${{env.CONTAINER_SVC3_NAME}}-${{env.BUILD_VERSION}} -d -p ${{env.HOST_PORT_SVC3}}:${{env.CONTAINER_PORT}} ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+      - name: "=== FINAL STEP ==="
+        run: sudo echo "You are all set"

@@ -1,0 +1,42 @@
+name: AKARA-CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SYSTEM_NAME: akara
+      DOCKER_REGISTRY: lyheangdev
+      DOCKER_IMAGE: auth_service
+      BUILD_VERSION: v1
+
+    steps:
+      - name: "=== SETTING UP NODE VERSION 20 FOR NEWER SUPPORT ON GIT ACTION ==="
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: "=== AUTHENTICATING TO DOCKERHUB REGISTRY ==="
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: "=== CHECKING OUT CODE FROM MAIN BRANCH TO RUNNER WORKING ENVIRONMENT FOR NEXT PROCESS ==="
+        uses: actions/checkout@v3
+
+      - name: "=== REMOVE ALL IMAGES IN CURRENT RUNNER ==="
+        run: docker rmi $(sudo docker images -q) || true
+
+      - name: "=== BUILDING DOCKER IMAGE ==="
+        run: docker build . --file Dockerfile --tag ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+      - name: "=== PUSHING DOCKER IMAGE TO DOCKERHUB ==="
+        run: docker push ${{env.DOCKER_REGISTRY}}/${{env.SYSTEM_NAME}}_${{env.DOCKER_IMAGE}}:${{env.BUILD_VERSION}}
+
+      - name: "=== FINAL COMPLETE OF TASK ==="
+        run: echo "Process complete"

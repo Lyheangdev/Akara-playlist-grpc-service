@@ -1,4 +1,4 @@
-name: AKARA-CD
+name: AKARA-PLAYLIST-CD
 on:
   workflow_run:
     workflows: ["AKARA-PLAYLIST-CI"]

@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 6000
 
 #=== Executing API application
-CMD ["npm", "start:prod"]
+CMD ["node", "index.js"]
